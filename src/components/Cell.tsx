@@ -34,17 +34,20 @@ const Cell = ({ row, col }: CellProps) => {
         else if (prev === CellStatus.FILLED) return CellStatus.X;
         else return CellStatus.BLANK;
       }),
-    []
+    [setValue]
   );
 
-  const onRightClick = useCallback((event) => {
-    event.preventDefault();
-    setValue((prev) => {
-      if (prev === CellStatus.BLANK) return CellStatus.X;
-      else if (prev === CellStatus.FILLED) return CellStatus.BLANK;
-      else return prev;
-    });
-  }, []);
+  const onRightClick = useCallback(
+    (event) => {
+      event.preventDefault();
+      setValue((prev) => {
+        if (prev === CellStatus.BLANK) return CellStatus.X;
+        else if (prev === CellStatus.FILLED) return CellStatus.BLANK;
+        else return prev;
+      });
+    },
+    [setValue]
+  );
 
   return (
     <TdStyled onClick={onClick} onContextMenu={onRightClick}>
