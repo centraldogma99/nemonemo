@@ -6,7 +6,7 @@ function App() {
   return (
     <RecoilRoot>
       <div className="App">
-        <Gameboard rowSize={5} colSize={5} />
+        <Gameboard rowSize={5} colSize={5} answer={[]} />
       </div>
     </RecoilRoot>
   );

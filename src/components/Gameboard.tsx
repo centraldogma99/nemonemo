@@ -11,6 +11,7 @@ import Cell from "./Cell";
 interface GameboardProps {
   rowSize: number;
   colSize: number;
+  answer: number[][];
 }
 
 const gameboardState = atom<CellStatus[][]>({
@@ -45,7 +46,7 @@ export const gameboardCellState = selectorFamily<
     },
 });
 
-const Gameboard = ({ rowSize, colSize }: GameboardProps) => {
+const Gameboard = ({ rowSize, colSize, answer }: GameboardProps) => {
   const [gameboard, setGameboard] = useRecoilState(gameboardState);
 
   useEffect(() => {
