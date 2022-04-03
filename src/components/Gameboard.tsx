@@ -1,9 +1,15 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { atom, selectorFamily, useRecoilState } from "recoil";
+import React, { useEffect, useState } from "react";
+import { useRecoilState } from "recoil";
 import { CellStatus } from "../types/CellStatus";
 import Cell from "./Cell";
 import isGameboardEqual from "../utils/isGameboardEqual";
 import parseAnswerIntoHints from "../utils/parseAnswerIntoHints";
+import {
+  gameboardState,
+  gameboardLineState,
+  gameboardCellState,
+} from "../stores/gameboard";
+import { Orientation } from "../types/Orientation";
 
 interface GameboardProps {
   rowSize: number;
@@ -11,45 +17,25 @@ interface GameboardProps {
   answer: (CellStatus.FILLED | CellStatus.BLANK)[][];
 }
 
-const gameboardState = atom<CellStatus[][]>({
-  key: "gameboardState",
-  default: [],
-});
-
-export const gameboardCellState = selectorFamily<
-  CellStatus,
-  { row: number; col: number }
->({
-  key: "gameboardCellState",
-  get:
-    ({ row, col }) =>
-    ({ get }) => {
-      const gameboard = get(gameboardState);
-      return gameboard[row][col];
-    },
-  set:
-    ({ row, col }) =>
-    ({ get, set }, newValue) => {
-      const gameboard = get(gameboardState);
-      set(gameboardState, [
-        ...gameboard.slice(0, row),
-        [
-          ...gameboard[row].slice(0, col),
-          newValue as CellStatus,
-          ...gameboard[row].slice(col + 1),
-        ],
-        ...gameboard.slice(row + 1),
-      ]);
-    },
-});
-
 const Gameboard = ({ rowSize, colSize, answer }: GameboardProps) => {
   const [gameboard, setGameboard] =
     useRecoilState<CellStatus[][]>(gameboardState);
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
 
+  const convertHintIntoStr = (hints: number[], orientation: Orientation) => {
+    if (orientation === Orientation.COLUMN) {
+      return hints.map((hint) => (
+        <>
+          {hint}
+          <br />
+        </>
+      ));
+    }
+  };
+
   useEffect(() => {
-    console.log(parseAnswerIntoHints(answer));
+    console.log(parseAnswerIntoHints(answer, Orientation.COLUMN));
+    console.log(parseAnswerIntoHints(answer, Orientation.ROW));
   }, []);
 
   useEffect(() => {

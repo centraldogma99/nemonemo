@@ -1,20 +1,41 @@
 import { CellStatus } from "../types/CellStatus";
+import { Orientation } from "../types/Orientation";
 
-const parseAnswerIntoHints = (
+const convertAnswerIntoColumns = (
   answer: (CellStatus.BLANK | CellStatus.FILLED)[][]
 ) => {
-  let a = Array(answer.length).fill(0);
-  let a_idx = 0;
-  for (let i = 0; i < answer.length; i++) {
-    for (let j = 0; j < answer[0].length; j++) {
-      if (answer[i][j] === CellStatus.BLANK) {
-        if (answer[i][j - 1] && answer[i][j - 1] === CellStatus.FILLED) a_idx++;
-        continue;
+  return answer[0].map((_, colIndex) => answer.map((row) => row[colIndex]));
+};
+
+const hintizer = (line: (CellStatus.BLANK | CellStatus.FILLED)[]) => {
+  let res: number[] = [];
+  line.forEach((v, i) => {
+    if (i > 0) {
+      if (v === CellStatus.FILLED) {
+        if (line[i - 1] !== CellStatus.FILLED) res = [...res, 1];
+        else res[res.length - 1]++;
+      } else if (v === CellStatus.BLANK) {
+        return;
       }
-      a[a_idx]++;
+    } else {
+      if (v === CellStatus.BLANK) {
+        return;
+      } else if (v === CellStatus.FILLED) {
+        res[0] = 1;
+      }
     }
-  }
-  return a;
+  });
+
+  return res;
+};
+
+const parseAnswerIntoHints = (
+  answer: (CellStatus.BLANK | CellStatus.FILLED)[][],
+  orientation: Orientation
+) => {
+  if (orientation === Orientation.ROW) return answer.map(hintizer);
+  else if (orientation === Orientation.COLUMN)
+    return convertAnswerIntoColumns(answer).map(hintizer);
 };
 
 export default parseAnswerIntoHints;

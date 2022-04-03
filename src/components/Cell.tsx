@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import { useRecoilState } from "recoil";
 import { CellStatus } from "../types/CellStatus";
-import { gameboardCellState } from "./Gameboard";
+import { gameboardCellState } from "../stores/gameboard";
 import styled from "@emotion/styled";
 
 const TdStyled = styled.td`
@@ -9,10 +9,10 @@ const TdStyled = styled.td`
   width: 30px;
   height: 30px;
   text-align: center;
+  &:hover {
+    background: #ddd;
+  }
 `;
-
-// hover 이벤트 정의
-
 interface CellProps {
   row: number;
   col: number;
@@ -21,7 +21,7 @@ interface CellProps {
 const Cell = ({ row, col }: CellProps) => {
   const [value, setValue] = useRecoilState(gameboardCellState({ row, col }));
 
-  const getCellInner = useCallback((value: CellStatus) => {
+  const getCellInnerAsString = useCallback((value: CellStatus): string => {
     if (value === CellStatus.BLANK) return "";
     else if (value === CellStatus.FILLED) return "O";
     else return "X";
@@ -51,7 +51,7 @@ const Cell = ({ row, col }: CellProps) => {
 
   return (
     <TdStyled onClick={onClick} onContextMenu={onRightClick}>
-      {getCellInner(value)}
+      {getCellInnerAsString(value)}
     </TdStyled>
   );
 };
