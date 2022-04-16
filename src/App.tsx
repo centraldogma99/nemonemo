@@ -7,16 +7,16 @@ const answer1: (CellStatus.BLANK | CellStatus.FILLED)[][] = [
   [
     CellStatus.BLANK,
     CellStatus.FILLED,
-    CellStatus.FILLED,
     CellStatus.BLANK,
     CellStatus.FILLED,
+    CellStatus.BLANK,
   ],
   [
-    CellStatus.BLANK,
     CellStatus.FILLED,
     CellStatus.BLANK,
     CellStatus.FILLED,
     CellStatus.BLANK,
+    CellStatus.FILLED,
   ],
   [
     CellStatus.FILLED,

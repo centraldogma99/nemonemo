@@ -1,18 +1,18 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { useRecoilState } from "recoil";
 import { CellStatus } from "../types/CellStatus";
 import { gameboardCellState } from "../stores/gameboard";
 import styled from "@emotion/styled";
+import { hoverState } from "./Gameboard";
 
-const TdStyled = styled.td`
+const StyledTd = styled.td<{ isHighlighted: boolean }>`
   border: solid 1px black;
   width: 30px;
   height: 30px;
   text-align: center;
-  &:hover {
-    background: #ddd;
-  }
+  background-color: ${({ isHighlighted }) => (isHighlighted ? "#ddd" : "#fff")};
 `;
+
 interface CellProps {
   row: number;
   col: number;
@@ -20,6 +20,12 @@ interface CellProps {
 
 const Cell = ({ row, col }: CellProps) => {
   const [value, setValue] = useRecoilState(gameboardCellState({ row, col }));
+  const [hover, setHover] = useRecoilState(hoverState);
+
+  const isHighlighted = useMemo(
+    () => row === hover.row || col === hover.col,
+    [col, hover.col, hover.row, row]
+  );
 
   const getCellInnerAsString = useCallback((value: CellStatus): string => {
     if (value === CellStatus.BLANK) return "";
@@ -49,10 +55,24 @@ const Cell = ({ row, col }: CellProps) => {
     [setValue]
   );
 
+  const handleHover = useCallback(() => {
+    setHover({ row, col });
+  }, [col, row, setHover]);
+
+  const handleHoverEnd = useCallback(() => {
+    setHover({ row: -1, col: -1 });
+  }, [setHover]);
+
   return (
-    <TdStyled onClick={onClick} onContextMenu={onRightClick}>
+    <StyledTd
+      onClick={onClick}
+      onContextMenu={onRightClick}
+      onMouseOver={handleHover}
+      onMouseOut={handleHoverEnd}
+      isHighlighted={isHighlighted}
+    >
       {getCellInnerAsString(value)}
-    </TdStyled>
+    </StyledTd>
   );
 };
 
