@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { CellStatus } from "../types/CellStatus";
 import Board from "../components/Board";
-import { Orientation } from "../types/Orientation";
+import { replaceXWithBlank } from "../utils/replaceXWithBlank";
+import { useRecoilState } from "recoil";
+import { gameboardState } from "../stores/gameboard";
 
 interface BoardSize {
   row: number;
@@ -13,44 +15,61 @@ const CreateAnswerPage = () => {
     row: 0,
     col: 0,
   });
-  const [board, setBoard] = useState<CellStatus[][]>([]);
+  const [board, setBoard] = useRecoilState(gameboardState);
+  const [isSizeDetermined, setIsSizeDetermined] = useState<boolean>(false);
 
-  const handleSizeChange = useCallback((orientation: Orientation) => {
-    return (e: React.ChangeEvent<HTMLInputElement>) => {
-      const o = orientation === Orientation.ROW ? "row" : "col";
-      const value = Number(e.target.value);
-      const a = shouldBoardWiden({ ...boardSize, [o]: value });
-      setBoardSize((prev) => {
-        return { ...prev, [o]: Number(e.target.value) };
-      });
-    };
-  }, []);
+  const isSizeValid = useMemo(
+    () => boardSize.row > 0 && boardSize.col > 0,
+    [boardSize.col, boardSize.row]
+  );
 
-  const shouldBoardWiden = useCallback(({ row, col }: BoardSize) => {
-    return { row: row > boardSize.row, col: col > boardSize.col };
-  }, []);
+  const handleSizeSubmit = useCallback(() => {
+    if (!isSizeValid) return;
+    else setIsSizeDetermined(true);
+  }, [isSizeValid]);
+
+  const parsedBoard = useMemo(() => replaceXWithBlank(board), [board]);
 
   useEffect(() => {
     setBoard(
       Array(boardSize.row).fill(Array(boardSize.col).fill(CellStatus.BLANK))
     );
-  }, [boardSize.col, boardSize.row]);
+  }, [setBoard, boardSize.col, boardSize.row]);
 
   return (
     <>
-      <p>행</p>
-      <input
-        type="number"
-        value={boardSize.row}
-        onChange={handleSizeChange(Orientation.ROW)}
-      />
-      <p>열</p>
-      <input
-        type="number"
-        value={boardSize.col}
-        onChange={handleSizeChange(Orientation.COLUMN)}
-      />
-      <Board board={board} />
+      {!isSizeDetermined && (
+        <div>
+          <p>행</p>
+          <input
+            type="number"
+            value={boardSize.row}
+            onChange={(e) =>
+              setBoardSize((prev) => {
+                return { ...prev, row: Number(e.target.value) };
+              })
+            }
+          />
+          <p>열</p>
+          <input
+            type="number"
+            value={boardSize.col}
+            onChange={(e) =>
+              setBoardSize((prev) => {
+                return { ...prev, col: Number(e.target.value) };
+              })
+            }
+          />
+          <input type="button" value="시작" onClick={handleSizeSubmit} />
+        </div>
+      )}
+
+      {isSizeDetermined && (
+        <>
+          <Board rowSize={boardSize.row} answer={parsedBoard} />
+        </>
+      )}
+      {JSON.stringify(board)}
     </>
   );
 };

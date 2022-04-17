@@ -1,5 +1,5 @@
 import { CellStatus } from "../types/CellStatus";
-import { atom, selectorFamily } from "recoil";
+import { atom, selector, selectorFamily } from "recoil";
 import { Orientation } from "../types/Orientation";
 
 export const gameboardState = atom<CellStatus[][]>({

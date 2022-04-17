@@ -34,8 +34,7 @@ const parseAnswerIntoHints = (
   orientation: Orientation
 ) => {
   if (orientation === Orientation.ROW) return answer.map(hintizer);
-  else if (orientation === Orientation.COLUMN)
-    return convertAnswerIntoColumns(answer).map(hintizer);
+  else return convertAnswerIntoColumns(answer).map(hintizer);
 };
 
 export default parseAnswerIntoHints;
