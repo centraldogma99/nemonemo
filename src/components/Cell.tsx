@@ -23,7 +23,7 @@ interface CellProps {
 const Cell = ({ row, col }: CellProps) => {
   const [value, setValue] = useRecoilState(gameboardCellState({ row, col }));
   const [hover, setHover] = useRecoilState(hoverState);
-  const [dragStart, setDragStart] = useRecoilState(dragStartState);
+  const setDragStart = useSetRecoilState(dragStartState);
   const dragDirection = useRecoilValue(dragDirectionState);
 
   useEffect(() => {
@@ -76,6 +76,7 @@ const Cell = ({ row, col }: CellProps) => {
   }, [col, row, setDragStart]);
 
   const handleDragEnd = useCallback(() => {
+    console.log("dragend");
     setDragStart({ row: -1, col: -1 });
   }, [setDragStart]);
 
@@ -84,7 +85,7 @@ const Cell = ({ row, col }: CellProps) => {
       onClick={onClick}
       onContextMenu={onRightClick}
       onMouseOver={handleHover}
-      onMouseOut={handleHoverEnd}
+      // onMouseOut={handleHoverEnd}
       isHighlighted={isHighlighted}
       isFilled={value === CellStatus.FILLED}
       onMouseDown={handleDragStart}
