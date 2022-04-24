@@ -5,6 +5,13 @@ import { CellStatus } from "../types/CellStatus";
 import { gameboardState } from "../stores/gameboard";
 import isGameboardEqual from "../utils/isGameboardEqual";
 import { replaceXWithBlank } from "../utils/replaceXWithBlank";
+import { Button } from "../components/Button";
+import styled from "@emotion/styled";
+
+const ButtonContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
 
 const GameboardPage = () => {
   const [gameboard, setGameboard] =
@@ -56,11 +63,12 @@ const GameboardPage = () => {
             value={jsonText}
             onChange={(e) => setJsonText(e.target.value)}
           />
-          <input
-            type={"button"}
-            value={"GO!"}
-            onClick={handleJsonButtonClick}
-          />
+          <ButtonContainer>
+            <Button type={"secondary"}>뒤로</Button>
+            <Button onClick={handleJsonButtonClick} type={"primary"}>
+              GO!
+            </Button>
+          </ButtonContainer>
         </>
       )}
     </>

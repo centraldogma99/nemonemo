@@ -1,10 +1,9 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
-import { CellStatus } from "../types/CellStatus";
+import { CellStatus, cellStatusToString } from "../types/CellStatus";
 import { gameboardCellState } from "../stores/gameboard";
 import styled from "@emotion/styled";
-import { dragDirectionState, dragStartState, hoverState } from "./Board";
-import { Direction } from "./Board";
+import { dragMouseButtonState, dragStartState, hoverState } from "./Board";
 
 const StyledTd = styled.td<{ isHighlighted?: boolean; isFilled?: boolean }>`
   border: solid 1px black;
@@ -20,35 +19,27 @@ interface CellProps {
   col: number;
 }
 
+export const cellStatusSwapper = (before: CellStatus) => {
+  if (before === CellStatus.X) return CellStatus.FILLED;
+  else if (before === CellStatus.FILLED) return CellStatus.X;
+  else return CellStatus.FILLED;
+};
+
+export const cellStatusRightSwapper = (before: CellStatus) => {
+  if (before === CellStatus.BLANK) return CellStatus.X;
+  else if (before === CellStatus.FILLED) return CellStatus.X;
+  else return CellStatus.BLANK;
+};
+
 const Cell = ({ row, col }: CellProps) => {
   const [value, setValue] = useRecoilState(gameboardCellState({ row, col }));
   const [hover, setHover] = useRecoilState(hoverState);
+  const setDragMouseButton = useSetRecoilState(dragMouseButtonState);
   const setDragStart = useSetRecoilState(dragStartState);
-  const dragDirection = useRecoilValue(dragDirectionState);
-
-  useEffect(() => {
-    if (!dragDirection) return;
-  }, []);
 
   const isHighlighted = useMemo(
     () => row === hover.row || col === hover.col,
     [col, hover.col, hover.row, row]
-  );
-
-  const getCellInnerAsString = useCallback((value: CellStatus): string => {
-    if (value === CellStatus.BLANK) return "";
-    else if (value === CellStatus.FILLED) return "O";
-    else return "X";
-  }, []);
-
-  const onClick = useCallback(
-    () =>
-      setValue((prev) => {
-        if (prev === CellStatus.BLANK) return CellStatus.FILLED;
-        else if (prev === CellStatus.FILLED) return CellStatus.X;
-        else return CellStatus.BLANK;
-      }),
-    [setValue]
   );
 
   const onRightClick = useCallback(
@@ -63,35 +54,44 @@ const Cell = ({ row, col }: CellProps) => {
     [setValue]
   );
 
-  const handleHover = useCallback(() => {
-    setHover({ row, col });
-  }, [col, row, setHover]);
+  const handleHover = useCallback(
+    (event) => {
+      event.preventDefault();
+      setHover({ row, col });
+    },
+    [col, row, setHover]
+  );
 
-  const handleHoverEnd = useCallback(() => {
-    setHover({ row: -1, col: -1 });
-  }, [setHover]);
+  const handleDragStart = useCallback(
+    (event) => {
+      event.preventDefault();
+      setValue(event.button === 0 ? cellStatusSwapper : cellStatusRightSwapper);
+      setDragMouseButton(event.button === 0 ? "left" : "right");
+      setDragStart({ row, col });
+    },
+    [col, row, setDragStart, setValue]
+  );
 
-  const handleDragStart = useCallback(() => {
-    setDragStart({ row, col });
-  }, [col, row, setDragStart]);
-
-  const handleDragEnd = useCallback(() => {
-    console.log("dragend");
-    setDragStart({ row: -1, col: -1 });
-  }, [setDragStart]);
+  const handleDragEnd = useCallback(
+    (event) => {
+      event.preventDefault();
+      setDragStart({ row: -1, col: -1 });
+    },
+    [setDragStart]
+  );
 
   return (
     <StyledTd
-      onClick={onClick}
+      // onClick={onClick}
       onContextMenu={onRightClick}
       onMouseOver={handleHover}
-      // onMouseOut={handleHoverEnd}
       isHighlighted={isHighlighted}
       isFilled={value === CellStatus.FILLED}
       onMouseDown={handleDragStart}
       onMouseUp={handleDragEnd}
+      onDrag={(e) => e.preventDefault()}
     >
-      {getCellInnerAsString(value)}
+      {cellStatusToString(value)}
     </StyledTd>
   );
 };

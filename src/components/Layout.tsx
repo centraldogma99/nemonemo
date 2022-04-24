@@ -4,15 +4,21 @@ import { atom, useRecoilValue, useSetRecoilState } from "recoil";
 import CreateAnswerPage from "../pages/CreateAnswerPage";
 import GameboardPage from "../pages/GameboardPage";
 import { gameboardState } from "../stores/gameboard";
+import { Button } from "./Button";
 
 const TabContainer = styled.div`
   display: flex;
   flex-direction: row;
 `;
 
-const TabDiv = styled.div`
-  border: 1px solid black;
-  text-align: center;
+const Wrapper = styled.div`
+  margin: auto;
+  width: 60%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 `;
 
 enum Page {
@@ -38,22 +44,21 @@ const Tab = ({ to, children }: TabProps & React.HTMLProps<HTMLDivElement>) => {
     setPage(to);
   }, [setPage, to]);
 
-  return <TabDiv onClick={handleClick}>{children}</TabDiv>;
+  return <Button onClick={handleClick}>{children}</Button>;
 };
 
 const Layout = () => {
   const currentPage = useRecoilValue(pageState);
 
   return (
-    <div>
-      <h1>nemonemo logic by junyeong</h1>
+    <Wrapper>
       <TabContainer>
         <Tab to={Page.Create}>Create</Tab>
         <Tab to={Page.Solve}>Solve</Tab>
       </TabContainer>
       {currentPage === Page.Create && <CreateAnswerPage />}
       {currentPage === Page.Solve && <GameboardPage />}
-    </div>
+    </Wrapper>
   );
 };
 

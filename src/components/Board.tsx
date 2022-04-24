@@ -1,22 +1,14 @@
-import React, { useEffect, useMemo } from "react";
-import {
-  atom,
-  useRecoilState,
-  useRecoilValue,
-  useSetRecoilState,
-} from "recoil";
+import React, { useCallback, useEffect, useMemo } from "react";
+import { atom, selector, useRecoilState, useRecoilValue } from "recoil";
 import { CellStatus } from "../types/CellStatus";
 import parseAnswerIntoHints from "../utils/parseAnswerIntoHints";
 import { gameboardState } from "../stores/gameboard";
 import { Orientation } from "../types/Orientation";
-import Cell from "./Cell";
+import Cell, { cellStatusRightSwapper, cellStatusSwapper } from "./Cell";
 import styled from "@emotion/styled";
 import HintCell from "./HintCell";
-import { range } from "lodash";
-import {
-  changeALineFrom2dArray,
-  changeOneElementFrom2dArray,
-} from "../utils/changeOneElementFrom2dArray";
+import { changeOneElementFrom2dArray } from "../utils/changeOneElementFrom2dArray";
+import CellCoordinate from "../types/CellCoordinate";
 
 export interface BoardProps {
   rowSize: number;
@@ -35,23 +27,36 @@ const ColHintCell = styled(HintCell)`
   align-items: end;
 `;
 
-export const hoverState = atom({
+export const hoverState = atom<CellCoordinate>({
   key: "hoverState",
   default: { row: -1, col: -1 },
 });
 
-export const dragStartState = atom({
+export const dragStartState = atom<CellCoordinate>({
   key: "dragStartState",
   default: { row: -1, col: -1 },
 });
 
-export const dragLastChangeState = atom({
+export const isDraggingState = selector({
+  key: "isDraggingState",
+  get: ({ get }) => {
+    const dragStart = get(dragStartState);
+    return dragStart.col >= 0 && dragStart.row >= 0;
+  },
+});
+
+export const dragLastChangeState = atom<CellCoordinate | undefined>({
   key: "dragLastChangeState",
-  default: { row: -1, col: -1 },
+  default: undefined,
 });
 
 export const dragDirectionState = atom<Direction | undefined>({
   key: "dragDirectionState",
+  default: undefined,
+});
+
+export const dragMouseButtonState = atom<"left" | "right" | undefined>({
+  key: "dragMouseButtonState",
   default: undefined,
 });
 
@@ -63,164 +68,83 @@ export enum Direction {
 }
 
 const Board = ({ rowSize, answer }: BoardProps) => {
+  // 마우스가 올라가 있는 좌표
   const hover = useRecoilValue(hoverState);
-  const board = useRecoilValue(gameboardState);
-  const setBoard = useSetRecoilState(gameboardState);
+  // 보드 상태
+  const [board, setBoard] = useRecoilState(gameboardState);
+  // 드래그가 시작된 지점
   const dragStart = useRecoilValue(dragStartState);
   const [dragLastChange, setDragLastChange] =
     useRecoilState(dragLastChangeState);
-  const [dragDirection, setDragDirection] = useRecoilState<
-    Direction | undefined
-  >(dragDirectionState);
-
-  const isDragging = useMemo(
-    () => dragStart.row >= 0 && dragStart.col >= 0,
-    [dragStart.col, dragStart.row]
-  );
-
-  const cellStatusSwapper = (before: CellStatus) => {
-    if (before === CellStatus.X) return CellStatus.FILLED;
-    else if (before === CellStatus.FILLED) return CellStatus.X;
-    else return CellStatus.X;
-  };
-
-  const newCell = useMemo(() => {
-    // 처음 움직이기 시작했을 때
-    if (
-      dragDirection === undefined &&
-      (hover.col !== dragStart.col || hover.row !== dragStart.row)
-    )
-      return hover;
-    else if (dragDirection === Direction.Left && hover.col < dragLastChange.col)
-      return { row: dragLastChange.row, col: hover.col };
-    else if (
-      dragDirection === Direction.Right &&
-      hover.col > dragLastChange.col
-    )
-      return { row: dragLastChange.row, col: hover.col };
-    else if (dragDirection === Direction.Up && hover.row < dragLastChange.row)
-      return { row: hover.row, col: dragLastChange.col };
-    else if (dragDirection === Direction.Down && hover.col > dragLastChange.col)
-      return { row: hover.row, col: dragLastChange.col };
-    return undefined;
-  }, [
-    dragDirection,
-    hover,
-    dragStart.col,
-    dragStart.row,
-    dragLastChange.col,
-    dragLastChange.row,
-  ]);
+  const [dragDirection, setDragDirection] = useRecoilState(dragDirectionState);
+  const isDragging = useRecoilValue(isDraggingState);
+  const dragMouseButton = useRecoilValue(dragMouseButtonState);
 
   useEffect(() => {
-    if (!isDragging) return;
-    if (newCell) {
-      console.log("newCell", newCell);
-      if (dragDirection === undefined) {
-        if (hover.row < dragStart.row) {
+    // 드래그 중단되었을 때
+    if (!isDragging) {
+      setDragDirection(undefined);
+      setDragLastChange(undefined);
+      return;
+    }
+    // 처음 움직이기 시작했을 때, lastChange와 direction을 채우기
+    if (dragDirection === undefined) {
+      if (hover.col !== dragStart.col || hover.row !== dragStart.row) {
+        if (hover.col < dragStart.col) {
           setDragDirection(Direction.Left);
           setDragLastChange({ row: dragStart.row, col: dragStart.col - 1 });
-        } else if (hover.row > dragStart.row) {
+        } else if (hover.col > dragStart.col) {
           setDragDirection(Direction.Right);
           setDragLastChange({ row: dragStart.row, col: dragStart.col + 1 });
-        } else if (hover.col < dragStart.col) {
+        } else if (hover.row < dragStart.row) {
           setDragDirection(Direction.Up);
           setDragLastChange({ row: dragStart.row - 1, col: dragStart.col });
-        } else if (hover.col > dragStart.col) {
+        } else if (hover.row > dragStart.row) {
           setDragDirection(Direction.Down);
           setDragLastChange({ row: dragStart.row + 1, col: dragStart.col });
         }
       }
-      setBoard((prev) =>
-        changeOneElementFrom2dArray(
-          prev,
-          newCell.row,
-          newCell.col,
-          cellStatusSwapper(prev[newCell.row][newCell.col])
-        )
-      );
-      setDragLastChange(newCell);
+      return;
     }
+    if (dragLastChange === undefined) return;
+
+    if (dragDirection === Direction.Left && hover.col < dragLastChange.col)
+      setDragLastChange({ row: dragLastChange.row, col: hover.col });
+    else if (
+      dragDirection === Direction.Right &&
+      hover.col > dragLastChange.col
+    )
+      setDragLastChange({ row: dragLastChange.row, col: hover.col });
+    else if (dragDirection === Direction.Up && hover.row < dragLastChange.row)
+      setDragLastChange({ row: hover.row, col: dragLastChange.col });
+    else if (dragDirection === Direction.Down && hover.row > dragLastChange.row)
+      setDragLastChange({ row: hover.row, col: dragLastChange.col });
   }, [
     dragDirection,
+    dragLastChange,
     dragStart.col,
     dragStart.row,
-    hover.col,
-    hover.row,
+    hover,
     isDragging,
-    newCell,
-    setBoard,
     setDragDirection,
     setDragLastChange,
   ]);
 
-  const draggedRange = useMemo(() => {
-    if (!isDragging) return [];
-    if (dragDirection === Direction.Left || dragDirection === Direction.Right) {
-      return range(
-        hover.col,
-        dragStart.col + 1,
-        dragDirection === Direction.Left ? 1 : -1
-      ).map((number) => {
-        return { row: dragStart.row, col: number };
-      });
-    } else {
-      return range(
-        hover.row,
-        dragStart.row + 1,
-        dragDirection === Direction.Up ? 1 : -1
-      ).map((number) => {
-        return { col: dragStart.col, row: number };
-      });
-    }
-  }, [
-    dragDirection,
-    dragStart.col,
-    dragStart.row,
-    hover.col,
-    hover.row,
-    isDragging,
-  ]);
-
+  // 한 칸씩 변경사항 반영
   useEffect(() => {
-    if (draggedRange.length === 0) return;
-    let max: number, min: number;
-    let fixed: number;
-    let orientation: Orientation;
-    if (dragDirection === Direction.Left || dragDirection === Direction.Right) {
-      orientation = Orientation.ROW;
-      max = Math.max(
-        draggedRange[0].col,
-        draggedRange[draggedRange.length - 1].col
-      );
-      min = Math.min(
-        draggedRange[0].col,
-        draggedRange[draggedRange.length - 1].col
-      );
-      fixed = draggedRange[0].row;
-    } else {
-      orientation = Orientation.COLUMN;
-      max = Math.max(
-        draggedRange[0].row,
-        draggedRange[draggedRange.length - 1].row
-      );
-      min = Math.min(
-        draggedRange[0].row,
-        draggedRange[draggedRange.length - 1].row
-      );
-      fixed = draggedRange[0].col;
-    }
-    setBoard((prev) => {
-      return changeALineFrom2dArray(
-        board,
-        fixed,
-        min,
-        max,
-        Array(max - min + 1).fill(CellStatus.FILLED),
-        orientation
-      );
-    });
-  }, [board, dragDirection, draggedRange, setBoard]);
+    if (!dragLastChange) return;
+    const { row, col } = dragLastChange;
+    setBoard((prev) =>
+      changeOneElementFrom2dArray(
+        prev,
+        row,
+        col,
+        dragMouseButton === "left"
+          ? cellStatusSwapper(prev[row][col])
+          : cellStatusRightSwapper(prev[row][col])
+      )
+    );
+  }, [dragLastChange, dragMouseButton, setBoard]);
 
   const rowHints = useMemo(
     () => parseAnswerIntoHints(answer, Orientation.ROW),
@@ -231,8 +155,13 @@ const Board = ({ rowSize, answer }: BoardProps) => {
     [answer]
   );
 
+  const handleResetClick = useCallback(() => {
+    setBoard((prev) => prev.map((row) => row.map((v) => CellStatus.BLANK)));
+  }, []);
+
   return (
     <>
+      <input type={"button"} value={"초기화하기"} onClick={handleResetClick} />
       <table>
         <tbody>
           <tr>
