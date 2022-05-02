@@ -16,15 +16,17 @@ export interface BoardProps {
 }
 
 const RowHintCell = styled(HintCell)`
-  white-space: pre;
   vertical-align: bottom;
   text-align: center;
 `;
 
 const ColHintCell = styled(HintCell)`
-  white-space: pre;
   text-align: right;
   align-items: end;
+`;
+
+const StyledTable = styled.table`
+  border-spacing: 0;
 `;
 
 export const hoverState = atom<CellCoordinate>({
@@ -69,7 +71,7 @@ export enum Direction {
 
 const Board = ({ rowSize, answer }: BoardProps) => {
   // 마우스가 올라가 있는 좌표
-  const hover = useRecoilValue(hoverState);
+  const [hover, setHover] = useRecoilState(hoverState);
   // 보드 상태
   const [board, setBoard] = useRecoilState(gameboardState);
   // 드래그가 시작된 지점
@@ -79,6 +81,10 @@ const Board = ({ rowSize, answer }: BoardProps) => {
   const [dragDirection, setDragDirection] = useRecoilState(dragDirectionState);
   const isDragging = useRecoilValue(isDraggingState);
   const dragMouseButton = useRecoilValue(dragMouseButtonState);
+
+  const handleBoardLeave = useCallback(() => {
+    setHover({ row: -1, col: -1 });
+  }, [setHover]);
 
   useEffect(() => {
     // 드래그 중단되었을 때
@@ -162,7 +168,7 @@ const Board = ({ rowSize, answer }: BoardProps) => {
   return (
     <>
       <input type={"button"} value={"초기화하기"} onClick={handleResetClick} />
-      <table>
+      <StyledTable onMouseLeave={handleBoardLeave}>
         <tbody>
           <tr>
             <td />
@@ -184,7 +190,7 @@ const Board = ({ rowSize, answer }: BoardProps) => {
             </tr>
           ))}
         </tbody>
-      </table>
+      </StyledTable>
     </>
   );
 };

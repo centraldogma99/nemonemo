@@ -6,6 +6,7 @@ export const changeOneElementFrom2dArray = <T>(
   col: number,
   value: T
 ) => {
+  console.log(arr);
   if (arr[row][col] === undefined)
     throw Error("wrong parameter, index not exist");
   return [

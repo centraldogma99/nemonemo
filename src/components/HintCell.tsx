@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "@emotion/styled";
+import { palette } from "./palette";
 
 interface Props {
   isHighlighted?: boolean;
@@ -7,7 +8,9 @@ interface Props {
 }
 
 const StyledTd = styled.td<{ isHighlighted: boolean }>`
-  background-color: ${({ isHighlighted }) => (isHighlighted ? "#ddd" : "#fff")};
+  white-space: pre;
+  background-color: ${({ isHighlighted }) =>
+    isHighlighted ? "#ddd" : palette.pink};
 `;
 
 const HintCell = ({

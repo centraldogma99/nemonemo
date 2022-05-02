@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import styled from "@emotion/styled";
 import { palette } from "../components/palette";
 import { Button } from "../components/Button";
@@ -29,6 +29,7 @@ const Container = styled.div`
   border-radius: 16px;
   background-color: ${palette.pink};
   color: ${palette.blue};
+  width: 400px;
 `;
 
 const Title = styled.div`
@@ -58,11 +59,11 @@ const IntroPage = () => {
   const [content, setContent] = useRecoilState(contentState);
   const handleSolveClick = useCallback(() => {
     setContent(Content.Solve);
-  }, []);
+  }, [setContent]);
 
   const handleCreateClick = useCallback(() => {
     setContent(Content.Create);
-  }, []);
+  }, [setContent]);
 
   return (
     <Body>
