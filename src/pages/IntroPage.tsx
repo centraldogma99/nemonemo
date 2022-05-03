@@ -70,7 +70,7 @@ const IntroPage = () => {
       <Wrapper>
         {content === undefined && (
           <Container>
-            <img src={"logo.png"} width={110} />
+            <img src={"logo.png"} width={110} alt={"logo img"} />
             <Title>네모네모로직</Title>
             <Item onClick={handleSolveClick}>풀래요!</Item>
             <Item onClick={handleCreateClick}>만들래요!</Item>

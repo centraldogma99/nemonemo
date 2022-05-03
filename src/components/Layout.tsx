@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import styled from "@emotion/styled";
 import { atom, useRecoilValue, useSetRecoilState } from "recoil";
 import CreateAnswerPage from "../pages/CreateAnswerPage";
@@ -42,7 +42,7 @@ const Tab = ({ to, children }: TabProps & React.HTMLProps<HTMLDivElement>) => {
   const handleClick = useCallback(() => {
     setGameboard([]);
     setPage(to);
-  }, [setPage, to]);
+  }, [setGameboard, setPage, to]);
 
   return <Button onClick={handleClick}>{children}</Button>;
 };

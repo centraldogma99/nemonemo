@@ -62,7 +62,7 @@ const Cell = ({ row, col }: CellProps) => {
       setDragMouseButton(event.button === 0 ? "left" : "right");
       setDragStart({ row, col });
     },
-    [col, row, setDragStart, setValue]
+    [col, row, setDragMouseButton, setDragStart, setValue]
   );
 
   const handleDragEnd = useCallback(

@@ -97,7 +97,13 @@ const Board = ({ rowSize, answer }: BoardProps) => {
     setDragDirection(undefined);
     setDragLastChange(undefined);
     setDragMouseButton(undefined);
-  }, [setHover]);
+  }, [
+    setDragDirection,
+    setDragLastChange,
+    setDragMouseButton,
+    setDragStart,
+    setHover,
+  ]);
 
   const handleBoardRightClick = useCallback((e) => {
     e.preventDefault();
@@ -152,6 +158,7 @@ const Board = ({ rowSize, answer }: BoardProps) => {
     isDragging,
     setDragDirection,
     setDragLastChange,
+    setDragMouseButton,
   ]);
 
   // 한 칸씩 변경사항 반영
@@ -180,8 +187,8 @@ const Board = ({ rowSize, answer }: BoardProps) => {
   );
 
   const handleResetClick = useCallback(() => {
-    setBoard((prev) => prev.map((row) => row.map((v) => CellStatus.BLANK)));
-  }, []);
+    setBoard((prev) => prev.map((row) => row.map((_) => CellStatus.BLANK)));
+  }, [setBoard]);
 
   return (
     <Container>
