@@ -4,6 +4,7 @@ import { css } from "@emotion/react";
 
 interface ButtonProps {
   type?: "primary" | "secondary";
+  width?: number;
 }
 
 const primaryStyle = css`
@@ -26,6 +27,11 @@ export const Button = styled.div<ButtonProps>`
   text-align: center;
   font-weight: bold;
   cursor: pointer;
+  ${({ width }) =>
+    width &&
+    css`
+      width: ${width}px;
+    `}
   ${({ type = "secondary" }) =>
     type === "primary" ? primaryStyle : secondaryStyle}
   &:hover {

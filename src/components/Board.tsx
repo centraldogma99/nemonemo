@@ -9,6 +9,8 @@ import styled from "@emotion/styled";
 import HintCell from "./HintCell";
 import { changeOneElementFrom2dArray } from "../utils/changeOneElementFrom2dArray";
 import CellCoordinate from "../types/CellCoordinate";
+import { Button } from "./Button";
+import Spacing from "./Spacing";
 
 export interface BoardProps {
   rowSize: number;
@@ -27,6 +29,12 @@ const ColHintCell = styled(HintCell)`
 
 const StyledTable = styled.table`
   border-spacing: 0;
+`;
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
 export const hoverState = atom<CellCoordinate>({
@@ -75,22 +83,32 @@ const Board = ({ rowSize, answer }: BoardProps) => {
   // 보드 상태
   const [board, setBoard] = useRecoilState(gameboardState);
   // 드래그가 시작된 지점
-  const dragStart = useRecoilValue(dragStartState);
+  const [dragStart, setDragStart] = useRecoilState(dragStartState);
   const [dragLastChange, setDragLastChange] =
     useRecoilState(dragLastChangeState);
   const [dragDirection, setDragDirection] = useRecoilState(dragDirectionState);
   const isDragging = useRecoilValue(isDraggingState);
-  const dragMouseButton = useRecoilValue(dragMouseButtonState);
+  const [dragMouseButton, setDragMouseButton] =
+    useRecoilState(dragMouseButtonState);
 
   const handleBoardLeave = useCallback(() => {
     setHover({ row: -1, col: -1 });
+    setDragStart({ row: -1, col: -1 });
+    setDragDirection(undefined);
+    setDragLastChange(undefined);
+    setDragMouseButton(undefined);
   }, [setHover]);
+
+  const handleBoardRightClick = useCallback((e) => {
+    e.preventDefault();
+  }, []);
 
   useEffect(() => {
     // 드래그 중단되었을 때
     if (!isDragging) {
       setDragDirection(undefined);
       setDragLastChange(undefined);
+      setDragMouseButton(undefined);
       return;
     }
     // 처음 움직이기 시작했을 때, lastChange와 direction을 채우기
@@ -166,21 +184,27 @@ const Board = ({ rowSize, answer }: BoardProps) => {
   }, []);
 
   return (
-    <>
-      <input type={"button"} value={"초기화하기"} onClick={handleResetClick} />
-      <StyledTable onMouseLeave={handleBoardLeave}>
+    <Container>
+      <Button onClick={handleResetClick} type={"primary"}>
+        초기화하기
+      </Button>
+      <Spacing size={32} />
+      <StyledTable
+        onMouseLeave={handleBoardLeave}
+        onContextMenu={handleBoardRightClick}
+      >
         <tbody>
           <tr>
             <td />
             {colHints?.map((d, i) => (
-              <RowHintCell isHighlighted={i === hover.col}>
+              <RowHintCell isHighlighted={i === hover.col} key={i}>
                 {d && d.join("\n")}
               </RowHintCell>
             ))}
           </tr>
           {board.map((row, i) => (
             <tr key={i}>
-              <ColHintCell isHighlighted={i === hover.row}>
+              <ColHintCell isHighlighted={i === hover.row} key={i}>
                 {rowHints[i] && rowHints[i].join(" ")}
               </ColHintCell>
 
@@ -191,7 +215,7 @@ const Board = ({ rowSize, answer }: BoardProps) => {
           ))}
         </tbody>
       </StyledTable>
-    </>
+    </Container>
   );
 };
 

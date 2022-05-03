@@ -8,20 +8,35 @@ import { replaceXWithBlank } from "../utils/replaceXWithBlank";
 import { Button } from "../components/Button";
 import styled from "@emotion/styled";
 import { contentState } from "./IntroPage";
+import Spacing from "../components/Spacing";
+import { palette } from "../components/palette";
+import { nullifyBoard } from "../utils/nullifyBoard";
+import useToast from "../components/Toast";
+import { Textarea } from "../components/Textarea";
 
 const ButtonContainer = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  width: 200px;
 `;
 
 const BoardContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 500px;
-  height: 500px;
+  border: 2.5px solid ${palette.blue};
+  border-radius: 16px;
+  padding: 20px;
+`;
+
+const Title = styled.div`
+  font-size: 1.35rem;
+  font-weight: bold;
+  color: ${palette.blue};
+`;
+
+const ErrorMessage = styled.div`
+  color: red;
 `;
 
 const GameboardPage = () => {
@@ -32,6 +47,8 @@ const GameboardPage = () => {
     (CellStatus.BLANK | CellStatus.FILLED)[][]
   >([]);
   const setContent = useSetRecoilState(contentState);
+  const [isError, setIsError] = useState<boolean>(false);
+  const { toast, showToast } = useToast("성공!", 5000);
 
   const isInitialized = useMemo(
     () => answer.length > 0 && answer[0].length > 0,
@@ -50,11 +67,28 @@ const GameboardPage = () => {
 
   const handleBackButtonClick = useCallback(() => {
     setContent(undefined);
-  }, [setContent]);
+    setGameboard((prev) => nullifyBoard(prev));
+  }, [setContent, setGameboard]);
 
   const handleJsonButtonClick = useCallback(async () => {
-    setAnswer(JSON.parse(jsonText));
+    try {
+      const res = JSON.parse(jsonText);
+      if (res.length === 0 || res[0].length === 0) {
+        return setIsError(true);
+      }
+      setAnswer(JSON.parse(jsonText));
+    } catch (e) {
+      setIsError(true);
+    }
   }, [jsonText]);
+
+  const handleTextareaChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setIsError(false);
+      setJsonText(e.target.value);
+    },
+    []
+  );
 
   useEffect(() => {
     if (isInitialized)
@@ -66,24 +100,43 @@ const GameboardPage = () => {
   }, [answer, isInitialized, setGameboard]);
 
   useEffect(() => {
-    if (isCompleted) alert("성공!");
-  }, [isCompleted]);
+    if (isCompleted) showToast();
+  }, [isCompleted, showToast]);
 
   return (
     <>
-      {isInitialized && <Board rowSize={answer.length} answer={answer} />}
+      {isInitialized && (
+        <>
+          {toast}
+          <BoardContainer>
+            <Board rowSize={answer.length} answer={answer} />
+          </BoardContainer>
+          <Spacing size={32} />
+          <Button onClick={handleBackButtonClick} type={"secondary"}>
+            뒤로
+          </Button>
+        </>
+      )}
       {!isInitialized && (
         <>
-          <input
-            type={"text"}
-            value={jsonText}
-            onChange={(e) => setJsonText(e.target.value)}
-          />
+          <Title>문제 코드를 입력해 주세요!</Title>
+          <Spacing size={24} />
+          <Textarea value={jsonText} onChange={handleTextareaChange} />
+          {isError && (
+            <>
+              <Spacing size={16} />
+              <ErrorMessage>문제 코드가 잘못된 것 같아요!</ErrorMessage>
+            </>
+          )}
+          <Spacing size={32} />
           <ButtonContainer>
             <Button onClick={handleBackButtonClick} type={"secondary"}>
               뒤로
             </Button>
-            <Button onClick={handleJsonButtonClick}>GO!</Button>
+            <Spacing size={16} inline />
+            <Button onClick={handleJsonButtonClick} width={80}>
+              GO!
+            </Button>
           </ButtonContainer>
         </>
       )}

@@ -4,6 +4,7 @@ import { CellStatus, cellStatusToString } from "../types/CellStatus";
 import { gameboardCellState } from "../stores/gameboard";
 import styled from "@emotion/styled";
 import { dragMouseButtonState, dragStartState, hoverState } from "./Board";
+import { palette } from "./palette";
 
 const StyledTd = styled.td<{ isHighlighted?: boolean; isFilled?: boolean }>`
   border: dotted 0.5px gray;
@@ -11,7 +12,11 @@ const StyledTd = styled.td<{ isHighlighted?: boolean; isFilled?: boolean }>`
   height: 30px;
   text-align: center;
   background-color: ${({ isHighlighted, isFilled }) =>
-    isFilled ? "#999" : isHighlighted ? "#ddd" : "#fff"};
+    isFilled
+      ? palette.gray
+      : isHighlighted
+      ? palette.lightGray
+      : palette.white};
 `;
 
 interface CellProps {
@@ -70,8 +75,6 @@ const Cell = ({ row, col }: CellProps) => {
 
   return (
     <StyledTd
-      // onClick={onClick}
-      // onContextMenu={onRightClick}
       onMouseOver={handleHover}
       isHighlighted={isHighlighted}
       isFilled={value === CellStatus.FILLED}

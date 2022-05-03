@@ -8,6 +8,10 @@ import NumberPicker from "../components/NumberPicker";
 import { Button } from "../components/Button";
 import styled from "@emotion/styled";
 import { contentState } from "./IntroPage";
+import { palette } from "../components/palette";
+import Spacing from "../components/Spacing";
+import { nullifyBoard } from "../utils/nullifyBoard";
+import useToast from "../components/Toast";
 
 interface BoardSize {
   row: number;
@@ -19,7 +23,7 @@ const CounterContainer = styled.div`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  width: 200px;
+  width: 250px;
   margin-bottom: 16px;
 `;
 
@@ -32,6 +36,7 @@ const ContentsWrapper = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  align-items: center;
   height: 200px;
 `;
 
@@ -39,6 +44,23 @@ const ButtonContainer = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+`;
+
+const ButtonContainer2 = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
+const StyledButton = styled(Button)`
+  width: 120px;
+`;
+
+const BoardContainer = styled.div`
+  border: 2.5px solid ${palette.blue};
+  border-radius: 16px;
+  padding: 20px;
+  align-items: center;
+  justify-content: center;
 `;
 
 const CreateAnswerPage = () => {
@@ -49,10 +71,16 @@ const CreateAnswerPage = () => {
   const [board, setBoard] = useRecoilState(gameboardState);
   const [isSizeDetermined, setIsSizeDetermined] = useState<boolean>(false);
   const setContent = useSetRecoilState(contentState);
+  const { toast, showToast } = useToast(
+    "문제 코드가 복사 되었습니다!",
+    2500,
+    300
+  );
 
   const handleBackButtonClick = useCallback(() => {
     setContent(undefined);
-  }, [setContent]);
+    setBoard((prev) => nullifyBoard(prev));
+  }, [setBoard, setContent]);
 
   const isSizeValid = useMemo(
     () => boardSize.row > 0 && boardSize.col > 0,
@@ -65,6 +93,11 @@ const CreateAnswerPage = () => {
   }, [isSizeValid]);
 
   const parsedBoard = useMemo(() => replaceXWithBlank(board), [board]);
+
+  const handleCompleteClick = useCallback(async () => {
+    await window.navigator.clipboard.writeText(JSON.stringify(parsedBoard));
+    showToast();
+  }, [parsedBoard, showToast]);
 
   useEffect(() => {
     setBoard(
@@ -87,7 +120,7 @@ const CreateAnswerPage = () => {
         <ContentsWrapper>
           <div>
             <CounterContainer>
-              <CounterLabel>행</CounterLabel>
+              <CounterLabel>행 개수</CounterLabel>
               <NumberPicker
                 value={boardSize.row}
                 setValue={setEachBoardSize("row")}
@@ -95,7 +128,7 @@ const CreateAnswerPage = () => {
               />
             </CounterContainer>
             <CounterContainer>
-              <CounterLabel>열</CounterLabel>
+              <CounterLabel>열 개수</CounterLabel>
               <NumberPicker
                 value={boardSize.col}
                 setValue={setEachBoardSize("col")}
@@ -107,17 +140,32 @@ const CreateAnswerPage = () => {
             <Button onClick={handleBackButtonClick} type={"secondary"}>
               뒤로
             </Button>
-            <Button onClick={handleSizeSubmit}>시작!</Button>
+            <Spacing size={16} inline />
+            <Button onClick={handleSizeSubmit} width={80}>
+              시작!
+            </Button>
           </ButtonContainer>
         </ContentsWrapper>
       )}
 
       {isSizeDetermined && (
         <>
-          <Board rowSize={boardSize.row} answer={parsedBoard} />
+          {toast}
+          <BoardContainer>
+            <Board rowSize={boardSize.row} answer={parsedBoard} />
+          </BoardContainer>
+          <Spacing size={32} />
+          <ButtonContainer2>
+            <Button onClick={handleBackButtonClick} type={"secondary"}>
+              뒤로
+            </Button>
+            <Spacing size={16} inline />
+            <StyledButton onClick={handleCompleteClick} type={"secondary"}>
+              완료!
+            </StyledButton>
+          </ButtonContainer2>
         </>
       )}
-      {JSON.stringify(board)}
     </>
   );
 };
