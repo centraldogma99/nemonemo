@@ -20,11 +20,14 @@ export interface BoardProps {
 const RowHintCell = styled(HintCell)`
   vertical-align: bottom;
   text-align: center;
+  line-height: 1.4rem;
 `;
 
 const ColHintCell = styled(HintCell)`
   text-align: right;
   align-items: end;
+  padding-right: 8px;
+  letter-spacing: 1px;
 `;
 
 const StyledTable = styled.table`
