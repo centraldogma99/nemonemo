@@ -9,7 +9,7 @@ import Spacing from "../components/Spacing";
 
 const Body = styled.div`
   height: 100vh;
-  background-color: #fbeaeb;
+  background-color: ${palette.pink};
 `;
 
 const Wrapper = styled.div`
@@ -43,6 +43,23 @@ const Title = styled.div`
 
 const Item = styled(Button)`
   margin-bottom: 12px;
+`;
+
+const Footer = styled.div`
+  position: fixed;
+  bottom: 0;
+  height: 32px;
+  background-color: ${palette.blue};
+  color: ${palette.pink};
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+
+  a {
+    color: ${palette.pink};
+  }
 `;
 
 export enum Content {
@@ -83,6 +100,9 @@ const IntroPage = () => {
         {content === Content.Create && <CreateAnswerPage />}
         {content === Content.Solve && <GameboardPage />}
       </Wrapper>
+      <Footer>
+        <a href={"https://github.com/centraldogma99/nemonemo"}>Github</a>
+      </Footer>
     </Body>
   );
 };

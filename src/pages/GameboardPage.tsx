@@ -13,6 +13,7 @@ import { palette } from "../components/palette";
 import { nullifyBoard } from "../utils/nullifyBoard";
 import useToast from "../components/Toast";
 import { Textarea } from "../components/Textarea";
+import { unhash } from "../utils/hashBoard";
 
 const ButtonContainer = styled.div`
   display: flex;
@@ -72,11 +73,13 @@ const GameboardPage = () => {
 
   const handleJsonButtonClick = useCallback(async () => {
     try {
-      const res = JSON.parse(jsonText);
+      const parsedText = `[${jsonText.trim().split(" ").join(", ")}]`;
+      const res = unhash(JSON.parse(parsedText));
       if (res.length === 0 || res[0].length === 0) {
         return setIsError(true);
       }
-      setAnswer(JSON.parse(jsonText));
+
+      setAnswer(res);
     } catch (e) {
       setIsError(true);
     }

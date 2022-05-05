@@ -12,6 +12,7 @@ import { palette } from "../components/palette";
 import Spacing from "../components/Spacing";
 import { nullifyBoard } from "../utils/nullifyBoard";
 import useToast from "../components/Toast";
+import { hash } from "../utils/hashBoard";
 
 interface BoardSize {
   row: number;
@@ -95,7 +96,9 @@ const CreateAnswerPage = () => {
   const parsedBoard = useMemo(() => replaceXWithBlank(board), [board]);
 
   const handleCompleteClick = useCallback(async () => {
-    await window.navigator.clipboard.writeText(JSON.stringify(parsedBoard));
+    await window.navigator.clipboard.writeText(
+      JSON.stringify(hash(parsedBoard)).slice(1, -1)
+    );
     showToast();
   }, [parsedBoard, showToast]);
 
