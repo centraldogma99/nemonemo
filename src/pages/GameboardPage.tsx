@@ -14,6 +14,9 @@ import { nullifyBoard } from "../utils/nullifyBoard";
 import useToast from "../components/Toast";
 import { Textarea } from "../components/Textarea";
 import { unhash } from "../utils/hashBoard";
+import QuizListItem from "../components/QuizListItem";
+import VerticalLine from "../components/VerticalLine";
+import quizs from "../quizs";
 
 const ButtonContainer = styled.div`
   display: flex;
@@ -38,6 +41,12 @@ const Title = styled.div`
 
 const ErrorMessage = styled.div`
   color: red;
+`;
+
+const QuizListItemContainer = styled.div`
+  display: grid;
+  row-gap: 0.75rem;
+  width: 200px;
 `;
 
 const GameboardPage = () => {
@@ -122,12 +131,32 @@ const GameboardPage = () => {
       )}
       {!isInitialized && (
         <>
-          <Title>문제 코드를 입력해 주세요!</Title>
+          <Title>문제를 선택해 주세요!</Title>
           <Spacing size={24} />
-          '만들래요!' 에서 문제를 만들고 <br />
-          '완료' 버튼을 누르면 문제 코드를 얻을 수 있습니다!
+          <QuizListItemContainer>
+            {quizs.map((quiz) => (
+              <QuizListItem
+                name={quiz.name}
+                colSize={quiz.colSize}
+                rowSize={quiz.rowSize}
+                onClick={() => setJsonText(quiz.code)}
+              />
+            ))}
+          </QuizListItemContainer>
           <Spacing size={24} />
-          <Textarea value={jsonText} onChange={handleTextareaChange} />
+          <VerticalLine />
+          <Spacing size={24} />
+          또는,
+          <Spacing size={4} />
+          <Title>문제 코드를 넣어 주세요</Title>
+          <Spacing size={24} />
+          <Textarea
+            value={jsonText}
+            onChange={handleTextareaChange}
+            placeholder={
+              "'만들래요!' 에서 문제를 만들고 '완료' 버튼을 누르면 문제 코드를 얻을 수 있습니다!"
+            }
+          />
           {isError && (
             <>
               <Spacing size={16} />
@@ -144,6 +173,7 @@ const GameboardPage = () => {
               GO!
             </Button>
           </ButtonContainer>
+          <Spacing size={48} />
         </>
       )}
     </>
