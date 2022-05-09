@@ -31,7 +31,7 @@ const BoardContainer = styled.div`
 `;
 
 const Title = styled.div`
-  font-size: 1.35rem;
+  font-size: 1.5rem;
   font-weight: bold;
   color: ${palette.blue};
 `;
@@ -123,6 +123,9 @@ const GameboardPage = () => {
       {!isInitialized && (
         <>
           <Title>문제 코드를 입력해 주세요!</Title>
+          <Spacing size={24} />
+          '만들래요!' 에서 문제를 만들고 <br />
+          '완료' 버튼을 누르면 문제 코드를 얻을 수 있습니다!
           <Spacing size={24} />
           <Textarea value={jsonText} onChange={handleTextareaChange} />
           {isError && (
