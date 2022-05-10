@@ -102,6 +102,12 @@ const GameboardPage = () => {
     []
   );
 
+  const handleQuizButtonClick = useCallback((hash: string) => {
+    const parsedText = `[${hash.trim().split(" ").join(", ")}]`;
+    const res = unhash(JSON.parse(parsedText));
+    setAnswer(res);
+  }, []);
+
   useEffect(() => {
     if (isInitialized)
       setGameboard(
@@ -139,7 +145,7 @@ const GameboardPage = () => {
                 name={quiz.name}
                 colSize={quiz.colSize}
                 rowSize={quiz.rowSize}
-                onClick={() => setJsonText(quiz.code)}
+                onClick={() => handleQuizButtonClick(quiz.code)}
               />
             ))}
           </QuizListItemContainer>
