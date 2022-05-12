@@ -26,7 +26,7 @@ interface CellProps {
 
 export const cellStatusSwapper = (before: CellStatus) => {
   if (before === CellStatus.X) return CellStatus.BLANK;
-  else if (before === CellStatus.FILLED) return CellStatus.X;
+  else if (before === CellStatus.FILLED) return CellStatus.BLANK;
   else return CellStatus.FILLED;
 };
 
