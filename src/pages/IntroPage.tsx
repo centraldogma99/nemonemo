@@ -37,8 +37,7 @@ const Title = styled.div`
   font-size: 36px;
   font-weight: bold;
   text-align: center;
-
-  margin-top: 12px;
+  letter-spacing: 2px;
 `;
 
 const Item = styled(Button)`
@@ -88,10 +87,10 @@ const IntroPage = () => {
         {content === undefined && (
           <Container>
             <img src={"logo.png"} width={110} alt={"logo img"} />
+            <Spacing size={12} />
             <Title>네모네모로직</Title>
             <Spacing size={18} />
-            '만들래요!' 에서 문제를 만들고 <br />
-            '완료' 버튼을 누르면 문제 코드를 얻을 수 있습니다!
+
             <Spacing size={18} />
             <Item onClick={handleSolveClick}>풀래요!</Item>
             <Item onClick={handleCreateClick}>만들래요!</Item>
