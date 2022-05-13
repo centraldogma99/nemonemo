@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import styled from "@emotion/styled";
 import { palette } from "../components/palette";
 import { Button } from "../components/Button";
@@ -6,6 +6,7 @@ import CreateAnswerPage from "./CreateAnswerPage";
 import GameboardPage from "./GameboardPage";
 import { atom, useRecoilState } from "recoil";
 import Spacing from "../components/Spacing";
+import LoginPage from "./LoginPage";
 
 const Body = styled.div`
   height: 100vh;
@@ -76,13 +77,19 @@ const IntroPage = () => {
   const handleSolveClick = useCallback(() => {
     setContent(Content.Solve);
   }, [setContent]);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
   const handleCreateClick = useCallback(() => {
     setContent(Content.Create);
   }, [setContent]);
 
+  const handleLogIn = useCallback(() => {
+    setIsLoggedIn(true);
+  }, []);
+
   return (
     <Body>
+      {!isLoggedIn && <LoginPage onSuccessCallback={handleLogIn} />}
       <Wrapper>
         {content === undefined && (
           <Container>
