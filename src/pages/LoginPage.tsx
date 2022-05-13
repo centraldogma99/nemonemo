@@ -8,7 +8,6 @@ import React, {
 } from "react";
 import styled from "@emotion/styled";
 import { palette } from "../components/palette";
-import { Button } from "../components/Button";
 import Spacing from "../components/Spacing";
 
 const Container = styled.div`
