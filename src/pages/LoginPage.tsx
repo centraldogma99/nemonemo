@@ -32,7 +32,8 @@ const CenterContainer = styled.div`
 
 const Text = styled.div`
   color: ${palette.blue};
-  font-size: 1.5rem;
+  font-size: 1.75rem;
+  font-weight: bold;
 `;
 
 interface NumberInputProps {
@@ -61,9 +62,15 @@ const Input = styled(NumberInput)`
   width: 1.75rem;
   height: 2rem;
   border-radius: 0.25rem;
-  margin-left: 0.25rem;
+  margin-left: 0.5rem;
+  caret-color: transparent;
+
   &:first-of-type {
     margin-left: 0;
+  }
+  &:focus {
+    outline: none;
+    border: ${palette.blue} solid 2.5px;
   }
 `;
 
@@ -72,12 +79,20 @@ const InputsContainer = styled.div`
   flex-direction: row;
 `;
 
+const MessageContainer = styled.div<{ isError?: boolean }>`
+  margin-top: 32px;
+  color: ${({ isError }) => (isError ? "red" : palette.blue)};
+  font-weight: 600;
+`;
+
 interface Props {
   onSuccessCallback: () => void;
 }
 
 const LoginPage = ({ onSuccessCallback }: Props) => {
-  const [values, setValues] = useState<string[]>([]);
+  const [values, setValues] = useState<string[]>(["", "", "", ""]);
+  const [isError, setIsError] = useState<boolean>(false);
+  const input1 = useRef<HTMLInputElement>(null);
   const input2 = useRef<HTMLInputElement>(null);
   const input3 = useRef<HTMLInputElement>(null);
   const input4 = useRef<HTMLInputElement>(null);
@@ -96,6 +111,7 @@ const LoginPage = ({ onSuccessCallback }: Props) => {
       if (value === "") return setValue(i, "");
       if (!value || isNaN(parseInt(value))) return;
       setValue(i, value);
+      if (isError) setIsError(false);
       switch (i) {
         case 0:
           input2.current?.focus();
@@ -108,24 +124,39 @@ const LoginPage = ({ onSuccessCallback }: Props) => {
           break;
       }
     },
-    [setValue]
+    [isError, setValue]
   );
 
-  const passwordComparison = useMemo(() => {
-    return ["0", "5", "1", "3"].every((v, i) => v === values[i]);
+  const isPasswordCorrect = useMemo(() => {
+    return ["0", "5", "3", "1"].every((v, i) => v === values[i]);
+  }, [values]);
+
+  const isInputFull = useMemo(() => {
+    return values.length === 4 && values.every((v) => v !== "");
   }, [values]);
 
   useEffect(() => {
-    if (passwordComparison) onSuccessCallback();
-  }, [passwordComparison, onSuccessCallback]);
+    if (isPasswordCorrect) {
+      setTimeout(onSuccessCallback, 1300);
+      return;
+    } else if (isInputFull) {
+      setValues(["", "", "", ""]);
+      setIsError(true);
+      input1.current?.focus();
+    }
+  }, [onSuccessCallback, values.length, isInputFull, isPasswordCorrect]);
 
   return (
     <Container>
       <CenterContainer>
         <Text>비밀번호를 입력하세요!</Text>
-        <Spacing size={32} />
+        <Spacing size={48} />
         <InputsContainer>
-          <Input value={values[0]} onChange={handleChange(0)} />
+          <Input
+            value={values[0]}
+            onChange={handleChange(0)}
+            innerRef={input1}
+          />
           <Input
             value={values[1]}
             onChange={handleChange(1)}
@@ -142,6 +173,10 @@ const LoginPage = ({ onSuccessCallback }: Props) => {
             innerRef={input4}
           />
         </InputsContainer>
+        <MessageContainer isError={isError}>
+          {isError && "틀렸습니다!"}
+          {isPasswordCorrect && "정답입니다! 잠시 후에 이동합니다..."}
+        </MessageContainer>
       </CenterContainer>
     </Container>
   );
