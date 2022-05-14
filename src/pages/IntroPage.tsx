@@ -96,9 +96,9 @@ const IntroPage = () => {
             <img src={"logo.png"} width={110} alt={"logo img"} />
             <Spacing size={12} />
             <Title>네모네모로직</Title>
-            <Spacing size={18} />
-
-            <Spacing size={18} />
+            <Spacing size={12} />
+            for 해련
+            <Spacing size={32} />
             <Item onClick={handleSolveClick}>풀래요!</Item>
             <Item onClick={handleCreateClick}>만들래요!</Item>
           </Container>

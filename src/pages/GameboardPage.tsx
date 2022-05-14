@@ -140,18 +140,19 @@ const GameboardPage = () => {
           <Title>문제를 선택해 주세요!</Title>
           <Spacing size={24} />
           <QuizListItemContainer>
-            {quizs.map((quiz) => (
+            {quizs.map((quiz, i) => (
               <QuizListItem
                 name={quiz.name}
                 colSize={quiz.colSize}
                 rowSize={quiz.rowSize}
                 onClick={() => handleQuizButtonClick(quiz.code)}
+                key={i}
               />
             ))}
           </QuizListItemContainer>
-          <Spacing size={24} />
+          <Spacing size={36} />
           <VerticalLine />
-          <Spacing size={24} />
+          <Spacing size={36} />
           또는,
           <Spacing size={4} />
           <Title>문제 코드를 넣어 주세요</Title>
