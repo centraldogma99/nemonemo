@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useMemo } from "react";
+import React, { useCallback, useState, useMemo, useEffect } from "react";
 import styled from "@emotion/styled";
 import { palette } from "../components/palette";
 import Spacing from "../components/Spacing";
@@ -55,6 +55,11 @@ const LoginPage = ({ onSuccessCallback }: Props) => {
   const onSuccess = useCallback(() => {
     setTimeout(onSuccessCallback, 1300);
   }, [onSuccessCallback]);
+
+  useEffect(() => {
+    if (!isError) return;
+    if (values.some((v) => v !== "")) setIsError(false);
+  }, [isError, values]);
 
   return (
     <Container>
