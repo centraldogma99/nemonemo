@@ -35,7 +35,7 @@ const Input = styled(NumberInput)`
   margin-left: 0.5rem;
   caret-color: transparent;
   color: ${palette.blue};
-  font-weight: bold;
+  font-weight: 550;
 
   &:first-of-type {
     margin-left: 0;
@@ -132,6 +132,7 @@ const PasswordInput = ({
         .fill(0)
         .map((_, i) => (
           <Input
+            key={i}
             value={values[i]}
             onChange={handleChange(i)}
             onKeyDown={handleKeyDown(i)}

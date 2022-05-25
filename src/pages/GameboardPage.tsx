@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Board from "../components/Board";
-import { useRecoilState, useSetRecoilState } from "recoil";
+import { atom, useRecoilState, useSetRecoilState } from "recoil";
 import { CellStatus } from "../types/CellStatus";
 import { gameboardState } from "../stores/gameboard";
 import isGameboardEqual from "../utils/isGameboardEqual";
@@ -49,6 +49,11 @@ const QuizListItemContainer = styled.div`
   width: 200px;
 `;
 
+export const isFinishedState = atom<boolean>({
+  key: "isFinishedState",
+  default: false,
+});
+
 const GameboardPage = () => {
   const [gameboard, setGameboard] =
     useRecoilState<CellStatus[][]>(gameboardState);
@@ -57,6 +62,7 @@ const GameboardPage = () => {
     (CellStatus.BLANK | CellStatus.FILLED)[][]
   >([]);
   const setContent = useSetRecoilState(contentState);
+  const [isFinished, setIsFinished] = useRecoilState(isFinishedState);
   const [isError, setIsError] = useState<boolean>(false);
   const { toast, showToast } = useToast("성공!", 5000);
 
@@ -70,10 +76,10 @@ const GameboardPage = () => {
     return replaceXWithBlank(gameboard);
   }, [gameboard]);
 
-  const isCompleted = useMemo(() => {
-    if (gameboard.length === 0) return false;
-    return isGameboardEqual(parsedGameboard, answer);
-  }, [answer, gameboard.length, parsedGameboard]);
+  useEffect(() => {
+    if (gameboard.length === 0) return;
+    if (isGameboardEqual(parsedGameboard, answer)) setIsFinished(true);
+  }, [answer, gameboard.length, parsedGameboard, setIsFinished]);
 
   const handleBackButtonClick = useCallback(() => {
     setContent(undefined);
@@ -118,8 +124,8 @@ const GameboardPage = () => {
   }, [answer, isInitialized, setGameboard]);
 
   useEffect(() => {
-    if (isCompleted) showToast();
-  }, [isCompleted, showToast]);
+    if (isFinished) showToast();
+  }, [isFinished, showToast]);
 
   return (
     <>
