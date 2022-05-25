@@ -35,13 +35,14 @@ interface Props {
 
 const Container = styled.div<Props>`
   position: fixed;
-  top: 100px;
+  top: 150px;
   background-color: ${palette.blue};
   padding: 0.75rem;
   color: ${palette.pink};
   font-weight: bold;
-  width: 250px;
-  font-size: 0.8rem;
+  width: 300px;
+  font-size: 1.25rem;
+  text-align: center;
 
   animation-duration: ${({ animateDuration }) => animateDuration}ms;
   animation-timing-function: ease-out;

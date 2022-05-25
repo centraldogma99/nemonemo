@@ -11,6 +11,7 @@ import { changeOneElementFrom2dArray } from "../utils/changeOneElementFrom2dArra
 import CellCoordinate from "../types/CellCoordinate";
 import { Button } from "./Button";
 import Spacing from "./Spacing";
+import { isFinishedState } from "../pages/GameboardPage";
 
 export interface BoardProps {
   rowSize: number;
@@ -93,6 +94,7 @@ const Board = ({ rowSize, answer }: BoardProps) => {
   const isDragging = useRecoilValue(isDraggingState);
   const [dragMouseButton, setDragMouseButton] =
     useRecoilState(dragMouseButtonState);
+  const [isFinished, setIsFinished] = useRecoilState(isFinishedState);
 
   const handleBoardLeave = useCallback(() => {
     setHover({ row: -1, col: -1 });
@@ -107,6 +109,10 @@ const Board = ({ rowSize, answer }: BoardProps) => {
     setDragStart,
     setHover,
   ]);
+
+  useEffect(() => {
+    if (isFinished) handleBoardLeave();
+  }, [isFinished, handleBoardLeave]);
 
   const handleBoardRightClick = useCallback((e) => {
     e.preventDefault();
@@ -190,8 +196,9 @@ const Board = ({ rowSize, answer }: BoardProps) => {
   );
 
   const handleResetClick = useCallback(() => {
+    setIsFinished(false);
     setBoard((prev) => prev.map((row) => row.map((_) => CellStatus.BLANK)));
-  }, [setBoard]);
+  }, [setBoard, setIsFinished]);
 
   return (
     <Container>

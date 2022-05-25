@@ -18,7 +18,7 @@ const NumberInput = React.forwardRef<
     type={"numeric"}
     inputMode={"decimal"}
     maxLength={1}
-    placeholder={"-"}
+    placeholder={"_"}
     ref={ref}
     {...rest}
   />
@@ -34,6 +34,8 @@ const Input = styled(NumberInput)`
   border-radius: 0.25rem;
   margin-left: 0.5rem;
   caret-color: transparent;
+  color: ${palette.blue};
+  font-weight: 550;
 
   &:first-of-type {
     margin-left: 0;
@@ -95,6 +97,17 @@ const PasswordInput = ({
     return values.length === length && values.every((v) => v !== "");
   }, [length, values]);
 
+  const handleKeyDown = useCallback(
+    (i: number) => (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.code !== "Backspace") return;
+      setValue(i, "");
+      if (i === 0 || inputRefs.current[i - 1] === null) return;
+      inputRefs.current[i - 1]?.focus();
+      setValue(i, "");
+    },
+    [setValue]
+  );
+
   useEffect(() => {
     if (!isInputFull) return;
     if (!isPasswordCorrect) {
@@ -119,8 +132,10 @@ const PasswordInput = ({
         .fill(0)
         .map((_, i) => (
           <Input
+            key={i}
             value={values[i]}
             onChange={handleChange(i)}
+            onKeyDown={handleKeyDown(i)}
             ref={(e) => (inputRefs.current[i] = e)}
           />
         ))}
