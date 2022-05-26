@@ -84,7 +84,8 @@ const GameboardPage = () => {
   const handleBackButtonClick = useCallback(() => {
     setContent(undefined);
     setGameboard((prev) => nullifyBoard(prev));
-  }, [setContent, setGameboard]);
+    setIsFinished(false);
+  }, [setContent, setGameboard, setIsFinished]);
 
   const handleJsonButtonClick = useCallback(async () => {
     try {
