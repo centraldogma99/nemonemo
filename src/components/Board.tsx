@@ -1,5 +1,11 @@
 import React, { useCallback, useEffect, useMemo } from "react";
-import { atom, selector, useRecoilState, useRecoilValue } from "recoil";
+import {
+  atom,
+  selector,
+  useRecoilState,
+  useRecoilValue,
+  useSetRecoilState,
+} from "recoil";
 import { CellStatus } from "../types/CellStatus";
 import parseAnswerIntoHints from "../utils/parseAnswerIntoHints";
 import { gameboardState } from "../stores/gameboard";
@@ -12,10 +18,13 @@ import CellCoordinate from "../types/CellCoordinate";
 import { Button } from "./Button";
 import Spacing from "./Spacing";
 import { isFinishedState } from "../pages/GameboardPage";
+import { contentState, Content } from "../pages/IntroPage";
+import { palette } from "./palette";
 
 export interface BoardProps {
   rowSize: number;
   answer: (CellStatus.FILLED | CellStatus.BLANK)[][];
+  isEnding?: boolean;
 }
 
 const RowHintCell = styled(HintCell)`
@@ -39,6 +48,12 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+`;
+
+const EndingTextContainer = styled.div`
+  font-weight: bold;
+  font-size: 1.25rem;
+  color: ${palette.blue};
 `;
 
 export const hoverState = atom<CellCoordinate>({
@@ -81,7 +96,7 @@ export enum Direction {
   Down,
 }
 
-const Board = ({ rowSize, answer }: BoardProps) => {
+const Board = ({ rowSize, answer, isEnding }: BoardProps) => {
   // 마우스가 올라가 있는 좌표
   const [hover, setHover] = useRecoilState(hoverState);
   // 보드 상태
@@ -95,6 +110,7 @@ const Board = ({ rowSize, answer }: BoardProps) => {
   const [dragMouseButton, setDragMouseButton] =
     useRecoilState(dragMouseButtonState);
   const [isFinished, setIsFinished] = useRecoilState(isFinishedState);
+  const setContent = useSetRecoilState(contentState);
 
   const handleBoardLeave = useCallback(() => {
     setHover({ row: -1, col: -1 });
@@ -196,16 +212,23 @@ const Board = ({ rowSize, answer }: BoardProps) => {
   );
 
   const handleResetClick = useCallback(() => {
+    if (isEnding && isFinished) return setContent(Content.Ending);
     setIsFinished(false);
     setBoard((prev) => prev.map((row) => row.map((_) => CellStatus.BLANK)));
-  }, [setBoard, setIsFinished]);
+  }, [isEnding, isFinished, setBoard, setContent, setIsFinished]);
 
   return (
     <Container>
       <Button onClick={handleResetClick} type={"primary"}>
-        초기화하기
+        {isFinished && isEnding ? "안녕?" : "초기화하기"}
       </Button>
       <Spacing size={32} />
+      {isEnding && isFinished && (
+        <EndingTextContainer>
+          무언가 바뀌었다.
+          <Spacing size={32} />
+        </EndingTextContainer>
+      )}
       <StyledTable
         onMouseLeave={handleBoardLeave}
         onContextMenu={handleBoardRightClick}

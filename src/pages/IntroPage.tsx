@@ -7,6 +7,7 @@ import GameboardPage from "./GameboardPage";
 import { atom, useRecoilState } from "recoil";
 import Spacing from "../components/Spacing";
 import LoginPage from "./LoginPage";
+import EndingCredit from "./EndingCredit";
 
 const Body = styled.div`
   height: 100vh;
@@ -65,6 +66,7 @@ const Footer = styled.div`
 export enum Content {
   Create,
   Solve,
+  Ending,
 }
 
 export const contentState = atom<Content | undefined>({
@@ -105,6 +107,7 @@ const IntroPage = () => {
         )}
         {content === Content.Create && <CreateAnswerPage />}
         {content === Content.Solve && <GameboardPage />}
+        {content === Content.Ending && <EndingCredit />}
       </Wrapper>
       <Footer>
         <a href={"https://github.com/centraldogma99/nemonemo"}>Github</a>

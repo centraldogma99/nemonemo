@@ -134,7 +134,7 @@ const GameboardPage = () => {
         <>
           {toast}
           <BoardContainer>
-            <Board rowSize={answer.length} answer={answer} />
+            <Board rowSize={answer.length} answer={answer} isEnding={true} />
           </BoardContainer>
           <Spacing size={32} />
           <Button onClick={handleBackButtonClick} type={"secondary"}>
