@@ -27,7 +27,7 @@ const QuizListItem = ({
   onClick,
 }: Props & React.HTMLProps<HTMLDivElement>) => {
   return (
-    <StyledButton onClick={onClick}>
+    <StyledButton onClick={onClick} width={180}>
       <ItemName>{name}</ItemName>
       <br />
       <div>
