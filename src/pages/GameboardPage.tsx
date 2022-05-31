@@ -45,8 +45,7 @@ const ErrorMessage = styled.div`
 
 const QuizListItemContainer = styled.div`
   display: grid;
-  row-gap: 0.75rem;
-  width: 200px;
+  row-gap: 1rem;
 `;
 
 export const isFinishedState = atom<boolean>({
@@ -65,6 +64,7 @@ const GameboardPage = () => {
   const [isFinished, setIsFinished] = useRecoilState(isFinishedState);
   const [isError, setIsError] = useState<boolean>(false);
   const { toast, showToast } = useToast("성공!", 5000);
+  const [isEnding, setIsEnding] = useState(false);
 
   const isInitialized = useMemo(
     () => answer.length > 0 && answer[0].length > 0,
@@ -110,6 +110,8 @@ const GameboardPage = () => {
   );
 
   const handleQuizButtonClick = useCallback((hash: string) => {
+    if (hash === "951 132 462 1023 1023 1023 510 252 120 951 10")
+      setIsEnding(true);
     const parsedText = `[${hash.trim().split(" ").join(", ")}]`;
     const res = unhash(JSON.parse(parsedText));
     setAnswer(res);
@@ -134,7 +136,11 @@ const GameboardPage = () => {
         <>
           {toast}
           <BoardContainer>
-            <Board rowSize={answer.length} answer={answer} isEnding={true} />
+            <Board
+              rowSize={answer.length}
+              answer={answer}
+              isEnding={isEnding}
+            />
           </BoardContainer>
           <Spacing size={32} />
           <Button onClick={handleBackButtonClick} type={"secondary"}>
